@@ -7,6 +7,7 @@
 #include <exception>
 #include <cstdio>
 
+
 // 线程池类，定义模板函数类是为了代码的复用，模板参数T是任务类
 template<typename T>
 class threadpool {
@@ -44,13 +45,13 @@ private:
 
 // 构造函数
 template<typename T>
-threadpool<T>::threadpool(int thread_number = 8, int max_requests = 10000) : 
+threadpool<T>::threadpool(int thread_number, int max_requests) : 
 	m_thread_number(thread_number), m_max_requests(max_requests), 
 	m_stop(false), m_threads(NULL) {
-		if ((thread_number <= 0) || (max_request <= 0))
+		if ((thread_number <= 0) || (max_requests <= 0)) {
 			throw std::exception();
-	
-	
+		}
+
 	m_threads = new pthread_t[m_thread_number];
 	
 	if (!m_threads) {
@@ -58,19 +59,20 @@ threadpool<T>::threadpool(int thread_number = 8, int max_requests = 10000) :
 	}
 
 	// 创建thread_number个线程，并将它们设置为线程脱离
-	for (int i =0; i < thread_number; ++i) {
-		cout <<"创建第"<<i<<"个线程"<< endl;
+	for (int i = 0; i < thread_number; ++i) {
+		printf("创建第%d个线程\n", i);
+		// worker是线程执行的函数在c++中是静态函数
+		if (pthread_create(m_threads + i, NULL, worker, this) != 0) {
+			delete[] m_threads;
+			throw std::exception();
+		}
+		// 线程分离
+		if (pthread_detach(m_threads[i])) {
+			delete[] m_threads;
+			throw std::exception();
+		}
 	}
-	// worker是线程执行的函数在c++中是静态函数
-	if (pthread_create(m_threads + i, NULL, worker, this) != 0) {
-		delete[] m_threads;
-		throw std::excecption();
-	}
-	// 线程分离
-	if (pthread_detach(m_thread[i])) {
-		delete[] m_threads;
-		throw std::exception();
-	}
+	
 }
 
 // 析构函数
@@ -114,7 +116,7 @@ void threadpool<T>::run() {
 		m_workqueue.pop_front();
 		m_queuelocker.unlock();
 
-		if (!rquest) {
+		if (!request) {
 			continue;
 		}
 		// 执行任务
