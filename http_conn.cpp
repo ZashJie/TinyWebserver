@@ -53,7 +53,7 @@ void http_conn::init(int sockfd, const sockaddr_in &addr) {
 
     init();
 }
-
+//
 void http_conn::init() {
     m_check_state = CHECK_STATE_REQUESTLINE;    // 初始化状态为请求首行
     m_checked_idx = 0;
