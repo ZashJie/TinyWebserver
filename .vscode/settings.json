@@ -1,0 +1,13 @@
+{
+    "ros.distro": "humble",
+    "files.associations": {
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "getinterface": "c",
+        "string": "cpp",
+        "in.h": "c",
+        "inet.h": "c",
+        "iostream": "cpp",
+        "ostream": "cpp"
+    }
+}

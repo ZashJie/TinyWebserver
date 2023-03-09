@@ -1,0 +1,13 @@
+{
+    "ros.distro": "humble",
+    "C_Cpp.errorSquiggles": "",
+    "files.associations": {
+        "exception": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "compare": "cpp",
+        "memory_resource": "cpp",
+        "limits": "cpp",
+        "type_traits": "cpp"
+    }
+}
