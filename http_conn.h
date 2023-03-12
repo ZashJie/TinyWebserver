@@ -150,7 +150,7 @@ private:
 
     bool add_content_type();
 
-    bool add_headers(int content_length);
+    void add_headers(int content_length);
 
     bool add_content_length(int content_length);
 
