@@ -1,23 +1,25 @@
 #ifndef HTTPCONNECTION_H
 #define HTTPCONNECTION_H
 
-#include <sys/epoll.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <assert.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <errno.h>
 #include "locker.h"
 #include <sys/uio.h>
-#include <string.h>
 
 class http_conn
 {
@@ -109,9 +111,25 @@ private:
     int m_content_length;
     char* m_file_address;       // 客户请求的目标文件被mmap内存映射到内存中的起始位置
 
+    // 用来填充http响应
+    void unmap();
+
+    // 目标文件状态
     struct stat m_file_stat;
 
+    // 多内存块
+    struct iovec m_iv[2];
+    int m_iv_count;
+
+    // 将要发送的字节数
+    int bytes_to_send;
+
+    // 已经发送的字节数
+    int bytes_have_send;
+
     CHECK_STATE m_check_state; // 主状态机当前所处的状态
+
+    bool process_write(HTTP_CODE ret);
 
     void init(); // 初始化连接其余的信息
 
@@ -123,6 +141,24 @@ private:
 
     char *get_line() { return m_read_buf + m_start_line; }
     HTTP_CODE do_request();
+
+    bool add_response(const char *format, ...);
+
+    bool add_status_line(int status, const char *title);
+
+    bool add_content(const char *content);
+
+    bool add_content_type();
+
+    bool add_headers(int content_length);
+
+    bool add_content_length(int content_length);
+
+    bool add_linger();
+
+    bool add_blank_line();
+
+
 };
 
 #endif
