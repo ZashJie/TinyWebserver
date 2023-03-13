@@ -13,7 +13,7 @@
 #include <signal.h>
 #include "http_conn.h"
 
-#define MAX_FD 66535 // 最大的文件描述符个数
+#define MAX_FD 66535 // 最大的文件描述符个数 
 #define MAX_EVENT_NUMBER 10000 // 监听的最大事件数量 
 
 // 添加文件描述符到epoll中
