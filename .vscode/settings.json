@@ -8,6 +8,10 @@
         "in.h": "c",
         "inet.h": "c",
         "iostream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "unordered_map": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp"
     }
 }

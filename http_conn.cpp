@@ -1,4 +1,5 @@
 #include "http_conn.h"
+#include "log.h"
 
 // define some http status msg
 const char *ok_200_title = "OK";
@@ -65,9 +66,10 @@ void http_conn::close_conn() {
 
 
 // 初始化连接
-void http_conn::init(int sockfd, const sockaddr_in &addr) {
+void http_conn::init(int sockfd, const sockaddr_in &addr, int close_log) {
     m_sockfd = sockfd;
     m_address = addr;
+    m_close_log = close_log;
 
     // 设置端口复用
     int reuse = 1;
@@ -382,6 +384,7 @@ bool http_conn::add_response(const char *format, ...) {
         return false;
     }
     m_write_idx += len;
+    LOG_INFO("request:%s", m_write_buf);
     va_end(arg_list);
     return true;
 }

@@ -26,22 +26,16 @@ private:
 private:
     // 线程池数量
     int m_thread_number;
-
     // 线程池数组, 大小与m_thread_number
     pthread_t *m_threads;
-
     // 请求队列中最多允许的, 等待处理的请求数量
     int m_max_requests;
-
     // 请求队列
     std::list<T *> m_workqueue;
-
     // 互斥锁
     locker m_queuelocker;
-
     // 信号量用来判断是否有任务需要处理
     sem m_queuestat;
-
     // 是否结束线程
     bool m_stop;
 };
@@ -102,18 +96,24 @@ void *threadpool<T>::worker(void *arg) {
 template<typename T>
 void threadpool<T>::run() {
     while (!m_stop) {
+        // 等待信号量
         m_queuestat.wait();
+        // 互斥锁加锁
         m_queuelocker.lock();
         if (m_workqueue.empty()) {
             m_queuelocker.unlock();
             continue;
         }
+        // 取出首个请求
         T *request = m_workqueue.front();
+        // 抛出
         m_workqueue.pop_front();
+        // 互斥锁解锁
         m_queuelocker.unlock();
         if (!request) {
             continue;
         }
+        // 进行HTTP请求解析
         request->process();
     }
 }

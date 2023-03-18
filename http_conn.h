@@ -86,7 +86,7 @@ public:
     };
 
     void process();                                 // 解析客户端请求
-    void init(int sockfd, const sockaddr_in &addr); // 初始化新接收的连接
+    void init(int sockfd, const sockaddr_in &addr, int close_log); // 初始化新接收的连接
     void close_conn();                              // 关闭连接
     bool read();                                    // 非阻塞的读
     bool write();                                   // 非阻塞的写
@@ -123,6 +123,9 @@ private:
 
     // 将要发送的字节数
     int bytes_to_send;
+
+    // 是否关闭日志
+    int m_close_log;
 
     // 已经发送的字节数
     int bytes_have_send;

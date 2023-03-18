@@ -12,6 +12,7 @@
 #include "threadpool.h"
 #include <signal.h>
 #include "http_conn.h"
+#include "log.h"
 
 #define MAX_FD 66535 // 最大的文件描述符个数 
 #define MAX_EVENT_NUMBER 10000 // 监听的最大事件数量 
@@ -63,6 +64,8 @@ int main(int argc, char* argv[]) {
     // 创建监听的套接字
     int listenfd = socket(PF_INET, SOCK_STREAM, 0);
 
+    Log::get_instance()->init("./ServerLog", 0, 2000, 800000, 800);
+
     // 设置端口复用（绑定前设置)
     int reuse = 1;
     setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
@@ -72,6 +75,8 @@ int main(int argc, char* argv[]) {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
     bind(listenfd, (struct sockaddr*)&address, sizeof(address));
+
+
 
     // 监听
     listen(listenfd, 5);
@@ -105,7 +110,7 @@ int main(int argc, char* argv[]) {
                     continue;
                 }
                 // 将新的客户的数据初始化，放到数组中
-                users[connfd].init(connfd, client_address);
+                users[connfd].init(connfd, client_address, 0);
             } else if (events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
                 // 对方异常断开或者错误等事件 （要去关闭连接）
                 users[sockfd].close_conn();
