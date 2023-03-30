@@ -18,13 +18,17 @@
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <errno.h>
-#include "locker.h"
 #include <sys/uio.h>
+#include <map>
+#include "locker.h"
+#include "lst_timer.h"
+#include "sql_connection_pool.h"
+#include "log.h"
 
 class http_conn
 {
 public:
-    static int m_epollfd;                      // 所有的socket上的事件都被注册到同一个epoll对象中。
+    static int m_epollfd;                      // 所有的socket上的事件都被注册到同一个epoll对象中
     static int m_user_count;                   // 统计用户的数量
     static const int READ_BUFFER_SIZE = 2048;  // 读缓冲区大小
     static const int WRITE_BUFFER_SIZE = 1024; // 写缓冲区大小
@@ -90,6 +94,9 @@ public:
     void close_conn();                              // 关闭连接
     bool read();                                    // 非阻塞的读
     bool write();                                   // 非阻塞的写
+
+    // 同步线程初始化数据库读取表
+    void initmysql_result(connection_pool *connPool);
 
 private:
     int m_sockfd;                      // 该HTTP连接的socket

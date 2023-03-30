@@ -76,8 +76,6 @@ int main(int argc, char* argv[]) {
     address.sin_port = htons(port);
     bind(listenfd, (struct sockaddr*)&address, sizeof(address));
 
-
-
     // 监听
     listen(listenfd, 5);
 

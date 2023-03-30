@@ -12,6 +12,8 @@
         "unordered_map": "cpp",
         "istream": "cpp",
         "numeric": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "bitset": "cpp",
+        "set": "cpp"
     }
 }

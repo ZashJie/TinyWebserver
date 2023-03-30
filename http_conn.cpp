@@ -1,6 +1,7 @@
 #include "http_conn.h"
 #include "log.h"
 
+
 // define some http status msg
 const char *ok_200_title = "OK";
 const char *error_400_title = "Bad Request";
@@ -14,6 +15,35 @@ const char *error_500_form = "There was an unusual problem serving the requested
 
 // 网站的根目录
 const char *doc_root = "/home/zpvisen/TinyWebServer/webserver/resources";
+map<string, string> users;
+
+// 同步线程初始化数据库读取表
+void initmysql_result(connection_pool *connPool) {
+    // 从数据库去连接
+    MYSQL *mysql = nullptr;
+    connectionRAII mysqlcon(&mysql, connPool);
+    int m_close_log = m_close_log;
+    // 检索数据
+    if (mysql_query(mysql, "SELECT username, passwd FROM user")) {
+        LOG_ERROR("SELECT error: %s\n", mysql_error(mysql));
+    }
+
+    // 从表中获取完整的结果
+    MYSQL_RES *result = mysql_store_result(mysql);
+
+    // 返回结果集中的列数
+    int num_fields = mysql_num_fields(result);
+
+    // 返回所有字段结构的数组
+    MYSQL_FIELD *fields = mysql_fetch_field(result);
+
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+        string temp1(row[0]);
+        string temp2(row[1]);
+        users[temp1] = temp2;
+    }
+}
+
 
 // 设置文件描述符非阻塞
 int setnonblocking(int fd) {
