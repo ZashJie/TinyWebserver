@@ -109,7 +109,7 @@ void connection_pool::DestroyPool() {
 
 //当前空闲的连接数
 int connection_pool::GetFreeConn() {
-    return this->m_FreeConn;
+    return this->m_FreeConn;    
 }
 
 connection_pool::~connection_pool() {

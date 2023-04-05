@@ -25,7 +25,7 @@ public:
 	}
 
 	bool unlock() {
-		return pthread_mutex_unlock(&m_mutex);
+		return pthread_mutex_unlock(&m_mutex) == 0;
 	}	
 
 	// 获取互斥锁的指针
@@ -48,13 +48,19 @@ class cond {
 			}
 		}
 		bool wait(pthread_mutex_t * mutex) {
-			return pthread_cond_wait(&m_cond, mutex) == 0;
+			int ret = 0;
+			ret = pthread_cond_wait(&m_cond, mutex) == 0;
+			return ret == 0;
 		}
 		~cond() {
 			pthread_cond_destroy(&m_cond);
 		}
 		bool timedwait(pthread_mutex_t * mutex, struct timespec t) {
-			return pthread_cond_timedwait(&m_cond, mutex, &t) == 0;
+			int ret = 0;
+			//pthread_mutex_lock(&m_mutex);
+			ret = pthread_cond_timedwait(&m_cond, mutex, &t);
+			//pthread_mutex_unlock(&m_mutex);
+			return ret == 0;
 		}
 		// signal增加条件变量
 		bool signal() {

@@ -17,7 +17,8 @@ public:
 
     ~threadpool();
 
-    bool append(T *request);
+    bool append(T *request, int state);
+    bool append_p(T *request);
 
 private:
     static void *worker(void *arg);
@@ -58,7 +59,6 @@ threadpool<T>::threadpool(int actor_model, connection_pool *connPool, int thread
     }
     // 创建thread_number个线程, 并设置为线程脱离
     for (int i = 0; i < thread_number; i++) {
-        printf("create the %d th thread\n", i);
         if (pthread_create(m_threads + i, NULL, worker, this) != 0) {
             delete [] m_threads;
             throw std::exception();
@@ -77,9 +77,24 @@ threadpool<T>::~threadpool() {
 }
 
 template<typename T>
-bool threadpool<T>::append(T *request) {
+bool threadpool<T>::append(T *request, int state) {
     m_queuelocker.lock();
-    if (m_workqueue.size() > m_max_requests) {
+    if (m_workqueue.size() >= m_max_requests) {
+        m_queuelocker.unlock();
+        return false;
+    }
+    request->m_state = state;
+    m_workqueue.push_back(request);
+    m_queuelocker.unlock();
+    m_queuestat.post();
+    return true;
+}
+template <typename T>
+bool threadpool<T>::append_p(T *request)
+{
+    m_queuelocker.lock();
+    if (m_workqueue.size() >= m_max_requests)
+    {
         m_queuelocker.unlock();
         return false;
     }
@@ -116,8 +131,42 @@ void threadpool<T>::run() {
         if (!request) {
             continue;
         }
-        // 进行HTTP请求解析
-        request->process();
+        // // 进行HTTP请求解析
+        // request->process();
+        if (1 == m_actor_model)
+        {
+            if (0 == request->m_state)
+            {
+                if (request->read_once())
+                {
+                    request->improv = 1;
+                    connectionRAII mysqlcon(&request->mysql, m_connPool);
+                    request->process();
+                }
+                else
+                {
+                    request->improv = 1;
+                    request->timer_flag = 1;
+                }
+            }
+            else
+            {
+                if (request->write())
+                {
+                    request->improv = 1;
+                }
+                else
+                {
+                    request->improv = 1;
+                    request->timer_flag = 1;
+                }
+            }
+        }
+        else
+        {
+            connectionRAII mysqlcon(&request->mysql, m_connPool);
+            request->process();
+        }
     }
 }
 

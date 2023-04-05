@@ -34,6 +34,17 @@ public:
     static const int WRITE_BUFFER_SIZE = 1024; // 写缓冲区大小
     static const int FILENAME_LEN = 200;        // 文件名称的最大长度
 
+    sockaddr_in *get_address()
+    {
+        return &m_address;
+    }
+
+    MYSQL *mysql;
+    int m_state;  //读为0, 写为1
+
+    int timer_flag;
+    int improv;
+
     http_conn() {}
     ~http_conn() {}
 
@@ -90,10 +101,12 @@ public:
     };
 
     void process();                                 // 解析客户端请求
-    void init(int sockfd, const sockaddr_in &addr, int close_log); // 初始化新接收的连接
-    void close_conn();                              // 关闭连接
+    void init(int sockfd, const sockaddr_in &addr, char *root, int TRIGMode,
+                     int close_log, string user, string passwd, string sqlname); // 初始化新接收的连接
+    void close_conn(bool real_close = true);                              // 关闭连接
     bool read();                                    // 非阻塞的读
     bool write();                                   // 非阻塞的写
+    bool read_once();
 
     // 同步线程初始化数据库读取表
     void initmysql_result(connection_pool *connPool);
@@ -137,6 +150,19 @@ private:
     // 已经发送的字节数
     int bytes_have_send;
 
+    int m_TRIGMode;
+
+    map<string, string> m_users;
+
+    char sql_user[100];
+    char sql_passwd[100];
+    char sql_name[100];
+
+    int cgi;        //是否启用的POST
+
+    char *doc_root;
+    char *m_string; //存储请求头数据
+
     CHECK_STATE m_check_state; // 主状态机当前所处的状态
 
     bool process_write(HTTP_CODE ret);
@@ -160,7 +186,7 @@ private:
 
     bool add_content_type();
 
-    void add_headers(int content_length);
+    bool add_headers(int content_length);
 
     bool add_content_length(int content_length);
 

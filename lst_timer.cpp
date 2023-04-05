@@ -42,9 +42,9 @@ void sort_timer_lst::add_timer(util_timer *timer, util_timer *lst_head) {
         if (timer->expire < tmp->expire) {
             // ! 有可能出bug，若有问题请看这里
             prev->next = timer;
-            timer->prev = prev;
-            tmp->prev = timer;
             timer->next = tmp;
+            tmp->prev = timer;
+            timer->prev = prev;
             break;
         }
         prev = tmp;
